@@ -9,24 +9,32 @@ export default function SimulationPage() {
   const [inputValue, setInputValue] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageKey>('en');
   const [selectedSymptom, setSelectedSymptom] = useState<SymptomKey | null>(null);
+  const [lastValidCode, setLastValidCode] = useState('');
 
   const handleKeyPress = (value: string) => {
-    const newInput = inputValue + value;
-    setInputValue(newInput);
-    
     if (value === '#') {
-      processUssdCode(newInput);
+      processUssdCode(inputValue + '#');
+    } else {
+      setInputValue(prev => prev + value);
     }
   };
 
   const processUssdCode = (code: string) => {
-    const cleanCode = code.replace('#', '');
-    const parts = cleanCode.split('*');
-    
+    const cleanCode = code.replace(/#$/, '');
+    const parts = cleanCode.split('*').filter(part => part !== '');
+    setLastValidCode(code);
+
+    // Reset to welcome if empty code is sent
+    if (code === '#') {
+      setCurrentStep('welcome');
+      setInputValue('');
+      return;
+    }
+
     // Welcome screen - dial *123#
     if (parts.length === 1 && parts[0] === '123') {
       setCurrentStep('language');
-    } 
+    }
     // Language selection - *123*1#
     else if (parts.length === 2 && parts[0] === '123') {
       const langIndex = parseInt(parts[1]) - 1;
@@ -35,7 +43,7 @@ export default function SimulationPage() {
         setSelectedLanguage(languages[langIndex]);
         setCurrentStep('symptom');
       }
-    } 
+    }
     // Symptom selection - *123*1*1#
     else if (parts.length === 3 && parts[0] === '123') {
       const symptomKeys = Object.keys(symptomFeedback) as SymptomKey[];
@@ -45,7 +53,7 @@ export default function SimulationPage() {
         setCurrentStep('feedback');
       }
     }
-    
+
     setInputValue('');
   };
 
@@ -54,13 +62,18 @@ export default function SimulationPage() {
     setInputValue('');
   };
 
-  // Get all symptom keys for quick dial buttons
   const symptomKeys = Object.keys(symptomFeedback) as SymptomKey[];
 
   return (
     <div className="max-w-md mx-auto mt-8 bg-white rounded-lg shadow-md overflow-hidden">
       <div className="p-6">
-        {/* Welcome Screen */}
+        {/* Display last successfully processed code */}
+        {lastValidCode && (
+          <div className="mb-2 text-sm text-gray-500">
+            Last dialed: <span className="font-mono">{lastValidCode}</span>
+          </div>
+        )}
+
         {currentStep === 'welcome' && (
           <div className="text-center">
             <h2 className="text-xl font-semibold mb-4">Welcome to JUVO Health</h2>
@@ -74,7 +87,6 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Language Selection */}
         {currentStep === 'language' && (
           <div>
             <h3 className="text-lg font-medium mb-4">Select Language:</h3>
@@ -108,7 +120,6 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Symptom Selection */}
         {currentStep === 'symptom' && (
           <div>
             <h3 className="text-lg font-medium mb-4">Select Symptom:</h3>
@@ -142,7 +153,6 @@ export default function SimulationPage() {
           </div>
         )}
 
-        {/* Feedback Screen */}
         {currentStep === 'feedback' && selectedSymptom && (
           <div>
             <h3 className="text-lg font-medium mb-4">Health Advice:</h3>
@@ -169,20 +179,22 @@ export default function SimulationPage() {
         )}
       </div>
 
-      {/* Keypad Section */}
       <div className="bg-gray-100 p-4 border-t">
-        <div className="mb-4">
+        <div className="mb-4 flex items-center">
           <input
             type="text"
             value={inputValue}
             readOnly
-            className="w-full p-2 border rounded text-center text-xl font-mono"
-            placeholder={
-              currentStep === 'welcome' ? '*123#' : 
-              currentStep === 'language' ? '*123*1#' : 
-              '*123*1*1#'
-            }
+            className="flex-1 p-2 border rounded text-center text-xl font-mono"
+            placeholder="Dial *123#"
           />
+          <button
+            onClick={() => inputValue && handleKeyPress('#')}
+            className="ml-2 bg-blue-600 text-white px-4 py-2 rounded-md"
+            disabled={!inputValue}
+          >
+            Send
+          </button>
         </div>
         <div className="grid grid-cols-3 gap-2">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, '*', 0, '#'].map((key) => (
