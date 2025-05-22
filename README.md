@@ -1,54 +1,73 @@
-# React + TypeScript + Vite
+# USSD Health Simulation Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React-based simulation of a USSD health service that allows users to:
+- Navigate through menu options
+- Select their preferred language
+- Choose health symptoms
+- Receive appropriate health advice
 
-Currently, two official plugins are available:
+## How the USSD Simulation Works
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. Dialing Process Flow
 
-## Expanding the ESLint configuration
+1. **Welcome Screen** (*123#)
+   - Initial screen with instructions
+   - Only accepts `*123#` to proceed
+   - Quick dial button available
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+2. **Language Selection** (*123*X#)
+   - Choose from 4 languages:
+     - 1. English (*123*1#)
+     - 2. Twi (*123*2#)
+     - 3. Fante (*123*3#)
+     - 4. Dagbani (*123*4#)
+   - Sets the language for all subsequent messages
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+3. **Symptom Selection** (*123*1*X#)
+   - List of available symptoms with numbers
+   - Each number corresponds to a symptom
+   - Example: `*123*1*1#` selects first symptom
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+4. **Health Feedback**
+   - Displays advice in selected language
+   - Options to go back or start over
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 2. Input Methods
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+- **Manual Keypad Entry**:
+  - Use the on-screen keypad
+  - Press `#` to send/submit your code
+  - `*` acts as menu level separator
+
+- **Quick Dial Buttons**:
+  - One-tap shortcuts for each step
+  - Appears contextually for current menu
+  - Shows the exact USSD code it will send
+
+### 3. Special Controls
+
+- **Send Button**:
+  - Alternative to pressing `#`
+  - Disabled when no input exists
+  - Processes current input when clicked
+
+- **Navigation Buttons**:
+  - "Back" returns to previous menu
+  - "Start Over" resets to welcome screen
+
+### 4. Technical Implementation
+
+```typescript
+// Key processing logic
+const handleKeyPress = (value: string) => {
+  if (value === '#') {
+    processUssdCode(inputValue + '#');
+  } else {
+    setInputValue(prev => prev + value);
+  }
+};
+
+// Code structure example
+*123#     // Main menu
+*123*1#   // English language
+*123*1*2# // Selects second symptom
