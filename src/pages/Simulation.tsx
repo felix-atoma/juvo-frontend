@@ -14,6 +14,9 @@ export default function SimulationPage() {
   const handleKeyPress = (value: string) => {
     if (value === '#') {
       processUssdCode(inputValue + '#');
+    } else if (value === 'DEL') {
+      // Delete the last character
+      setInputValue(prev => prev.slice(0, -1));
     } else {
       setInputValue(prev => prev + value);
     }
@@ -206,6 +209,14 @@ export default function SimulationPage() {
               {key}
             </button>
           ))}
+          {/* Delete button */}
+          <button
+            onClick={() => handleKeyPress('DEL')}
+            className="p-4 bg-red-500 text-white rounded-md shadow-sm hover:bg-red-600 text-xl font-mono col-span-3"
+            disabled={!inputValue}
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>
