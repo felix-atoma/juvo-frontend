@@ -140,7 +140,7 @@ export default function SimulationPage() {
             
             <h4 className="text-md font-medium mb-2">Quick Dial Options:</h4>
             <div className="grid grid-cols-2 gap-2">
-              {symptomKeys.map((symptom, index) => (
+              {symptomKeys.map((_, index) => (
                 <button
                   key={`symptom-${index}`}
                   onClick={() => handleKeyPress(`*123*1*${index + 1}#`)}
