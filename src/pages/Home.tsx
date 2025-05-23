@@ -14,9 +14,12 @@ export default function HomePage() {
         >
           Simulate USSD
         </Link>
-        <button className="block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 w-full">
+        <Link
+          to="/voice"
+          className="block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700"
+        >
           Voice Demo
-        </button>
+        </Link>
       </div>
     </div>
   )
